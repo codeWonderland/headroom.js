@@ -8,6 +8,32 @@ function isDOMElement(obj) {
 }
 
 /**
+ * Toggle a class on a particular element
+ * @param {Element} el
+ * @param {string} className
+ */
+function toggleClass(el, className) {
+  if (el.classList) {
+    el.classList.toggle(className);
+  } else {
+    var classes = el.className.split(' ');
+    var existingIndex = -1;
+    for (var i = classes.length; i--;) {
+      if (classes[i] === className) {
+        existingIndex = i;
+      }
+    }
+
+    if (existingIndex >= 0) {
+      classes.splice(existingIndex, 1);
+    } else {
+      classes.push(className);
+    }
+    el.className = classes.join(' ');
+  }
+}
+
+/**
  * Helper function for extending objects
  */
 function extend (object /*, objectN ... */) {
@@ -130,6 +156,21 @@ Headroom.prototype = {
     if(classList.contains(classes.pinned) || !classList.contains(classes.unpinned)) {
       classList.add(classes.unpinned);
       classList.remove(classes.pinned);
+
+      var body = document.getElementsByTagName('body')[0];
+      var search = document.getElementById('searchbar');
+      var nav = document.getElementById('drop-nav');
+
+      if (search.style.display !== 'none') {
+        search.style.display = 'none';
+        toggleClass(body, 'search-open');
+      }
+
+      if (nav.style.display !== 'none') {
+        nav.style.display = 'none';
+        toggleClass(body, 'nav-open');
+      }
+
       this.onUnpin && this.onUnpin.call(this);
     }
   },
@@ -289,7 +330,7 @@ Headroom.prototype = {
   /**
    * determines if the scroll position is outside of document boundaries
    * @param  {int}  currentScrollY the current y scroll position
-   * @return {bool} true if out of bounds, false otherwise
+   * @return {boolean} true if out of bounds, false otherwise
    */
   isOutOfBounds : function (currentScrollY) {
     var pastTop  = currentScrollY < 0,
@@ -301,7 +342,7 @@ Headroom.prototype = {
   /**
    * determines if the tolerance has been exceeded
    * @param  {int} currentScrollY the current scroll y position
-   * @return {bool} true if tolerance exceeded, false otherwise
+   * @return {boolean} true if tolerance exceeded, false otherwise
    */
   toleranceExceeded : function (currentScrollY, direction) {
     return Math.abs(currentScrollY-this.lastKnownScrollY) >= this.tolerance[direction];
@@ -310,8 +351,8 @@ Headroom.prototype = {
   /**
    * determine if it is appropriate to unpin
    * @param  {int} currentScrollY the current y scroll position
-   * @param  {bool} toleranceExceeded has the tolerance been exceeded?
-   * @return {bool} true if should unpin, false otherwise
+   * @param  {boolean} toleranceExceeded has the tolerance been exceeded?
+   * @return {boolean} true if should unpin, false otherwise
    */
   shouldUnpin : function (currentScrollY, toleranceExceeded) {
     var scrollingDown = currentScrollY > this.lastKnownScrollY,
@@ -323,8 +364,8 @@ Headroom.prototype = {
   /**
    * determine if it is appropriate to pin
    * @param  {int} currentScrollY the current y scroll position
-   * @param  {bool} toleranceExceeded has the tolerance been exceeded?
-   * @return {bool} true if should pin, false otherwise
+   * @param  {boolean} toleranceExceeded has the tolerance been exceeded?
+   * @return {boolean} true if should pin, false otherwise
    */
   shouldPin : function (currentScrollY, toleranceExceeded) {
     var scrollingUp  = currentScrollY < this.lastKnownScrollY,
